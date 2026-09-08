@@ -1,0 +1,14 @@
+{
+  "id": "default-2",
+  "name": "Omelette Spéciale au Fromage",
+  "portions": 4,
+  "bookRef": "La Cuisine Facile",
+  "ratingTaste": 3,
+  "ratingEase": 4,
+  "ingredients": [
+    { "name": "Œufs", "quantity": 8, "unit": "pièces" },
+    { "name": "Gruyère râpé", "quantity": 100, "unit": "g" },
+    { "name": "Crème fraîche", "quantity": 50, "unit": "ml" }
+  ],
+  "instructions": "1. Battre les œufs énergiquement dans un saladier avec le sel, le poivre et la crème fraîche.\n2. Faire chauffer une poêle à feu moyen avec une noix de beurre, puis verser les œufs.\n3. Ajouter le gruyère râpé sur le dessus pendant la cuisson.\n4. Plier l'omelette en deux lorsqu'elle est encore légèrement baveuse et servir chaud."
+}

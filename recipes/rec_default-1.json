@@ -1,0 +1,15 @@
+{
+  "id": "default-1",
+  "name": "Pâtes Carbonara Simplifiées",
+  "portions": 4,
+  "bookRef": "Livre de base de la cuisine",
+  "ratingTaste": 4,
+  "ratingEase": 4,
+  "ingredients": [
+    { "name": "Pâtes", "quantity": 400, "unit": "g" },
+    { "name": "Crème fraîche", "quantity": 200, "unit": "ml" },
+    { "name": "Gruyère râpé", "quantity": 100, "unit": "g" },
+    { "name": "Œufs", "quantity": 2, "unit": "pièces" }
+  ],
+  "instructions": "1. Faire cuire les pâtes dans de l'eau bouillante salée.\n2. Dans un bol, battre les œufs et ajouter la crème fraîche ainsi que le gruyère râpé.\n3. Égoutter les pâtes, puis verser le mélange à base d'œufs sur les pâtes chaudes hors du feu. Mélanger énergiquement et servir aussitôt."
+}

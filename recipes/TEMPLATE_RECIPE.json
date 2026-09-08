@@ -1,0 +1,13 @@
+{
+  "name": "Poulet à la Crème de Saison",
+  "portions": 4,
+  "bookRef": "Ma cuisine à moi - Template",
+  "ratingTaste": 5,
+  "ratingEase": 4,
+  "ingredients": [
+    { "name": "Émincé de poulet", "quantity": 500, "unit": "g" },
+    { "name": "Crème fraîche épaisse", "quantity": 250, "unit": "ml" },
+    { "name": "Champignons frais", "quantity": 200, "unit": "g" }
+  ],
+  "instructions": "1. Faire revenir les champignons émincés dans une poêle de beurre chaud.\n2. Saisir séparément les émincés de poulet.\n3. Réunir le poulet et les champignons, saler, poivrer, puis verser la crème entière.\n4. Laisser mijoter 5 minutes à feu très doux et servir avec du riz basmati."
+}
