@@ -146,6 +146,25 @@ if (!fs.existsSync(RECIPES_DIR)) {
   fs.mkdirSync(RECIPES_DIR, { recursive: true });
 }
 
+const RECIPE_ID_PATTERN = /^[A-Za-z0-9_-]{1,100}$/;
+function getRecipeFilePath(id: string): string {
+  if (!RECIPE_ID_PATTERN.test(id)) {
+    throw new Error('Invalid recipe ID');
+  }
+
+  const recipePath = path.resolve(RECIPES_DIR, `rec_${id}.json`);
+  const recipesRoot = `${path.resolve(RECIPES_DIR)}${path.sep}`;
+  if (!recipePath.startsWith(recipesRoot)) {
+    throw new Error('Invalid recipe path');
+  }
+  return recipePath;
+}
+
+function sendInternalError(res: express.Response, context: string, error: unknown, message: string) {
+  console.error(context, error);
+  res.status(500).json({ error: message });
+}
+
 // Standardized Recipe Templates for user and AI reference
 const TEMPLATE_JSON = {
   "name": "Poulet à la Crème de Saison",
@@ -283,7 +302,7 @@ function writeDB(state: DatabaseState): void {
         }
         activeIds.add(recipe.id);
 
-        const recipeFilePath = path.join(RECIPES_DIR, `rec_${recipe.id}.json`);
+        const recipeFilePath = getRecipeFilePath(recipe.id);
         fs.writeFileSync(recipeFilePath, JSON.stringify(recipe, null, 2), 'utf-8');
       }
 
@@ -307,9 +326,26 @@ function writeDB(state: DatabaseState): void {
   }
 }
 
-// Enable body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Keep the unauthenticated local API bounded even when another device floods it.
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+app.use((req, res, next) => {
+  const now = Date.now();
+  const key = req.ip || 'unknown';
+  const current = requestCounts.get(key);
+  if (!current || current.resetAt <= now) {
+    requestCounts.set(key, { count: 1, resetAt: now + 60_000 });
+    return next();
+  }
+  if (current.count >= 120) {
+    return res.status(429).json({ error: 'Trop de requêtes. Réessayez dans un instant.' });
+  }
+  current.count += 1;
+  next();
+});
+
+// Enable body parsing with limits appropriate for local recipe data and chat requests.
+app.use(express.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 
 // Local network IP restriction filter (LAN-only security guard)
 function isLocalNetworkIP(ip: string): boolean {
@@ -451,6 +487,8 @@ app.post('/api/db/recipes', (req, res) => {
   
   if (!newRecipe.id) {
     newRecipe.id = 'rec_' + Math.random().toString(36).substr(2, 9);
+  } else if (!RECIPE_ID_PATTERN.test(newRecipe.id)) {
+    return res.status(400).json({ error: 'Identifiant de recette invalide' });
   }
   newRecipe.portions = 4; // Always lock to 4 people per instructions
 
@@ -562,6 +600,9 @@ app.post('/api/db/manual-shopping/clear-completed', (req, res) => {
 // AI Recipes Suggestions using Stock & Custom query
 app.post('/api/ai/suggest', async (req, res) => {
   const { mode, customPrompt } = req.body;
+  if (customPrompt !== undefined && (typeof customPrompt !== 'string' || customPrompt.length > 2_000)) {
+    return res.status(400).json({ error: 'Demande personnalisée invalide ou trop longue.' });
+  }
   const db = readDB();
   
   // Format current stock to help Gemini
@@ -642,7 +683,7 @@ IMPORTANT :
     res.json({ success: true, suggestions });
   } catch (error: any) {
     console.error('Gemini Suggestion Error:', error);
-    res.status(500).json({ error: error.message || "Erreur lors de la génération d'idées de recettes." });
+    sendInternalError(res, 'Gemini Suggestion Error:', error, "Erreur lors de la génération d'idées de recettes.");
   }
 });
 
@@ -652,6 +693,12 @@ app.post('/api/ai/parse-book-recipe', async (req, res) => {
   
   if (!text || text.trim() === '') {
     return res.status(400).json({ error: 'Le texte de la recette est requis.' });
+  }
+  if (typeof text !== 'string' || text.length > 100_000) {
+    return res.status(413).json({ error: 'Le texte de la recette est trop volumineux.' });
+  }
+  if (bookRef !== undefined && (typeof bookRef !== 'string' || bookRef.length > 500)) {
+    return res.status(400).json({ error: 'Référence de livre invalide.' });
   }
 
   const prompt = `Analyse cette recette de cuisine issue de mon livre de cuisine et formate-la de manière rigoureuse en un objet JSON structuré.
@@ -725,7 +772,7 @@ IMPORTANT :
     res.json({ success: true, recipe: completedRecipe });
   } catch (error: any) {
     console.error('Gemini Parser Error:', error);
-    res.status(500).json({ error: error.message || "Impossible de décoder la recette brute." });
+    sendInternalError(res, 'Gemini Parser Error:', error, "Impossible de décoder la recette brute.");
   }
 });
 
@@ -733,7 +780,8 @@ IMPORTANT :
 // Helper to categorize ingredients on-the-fly dynamically
 app.post('/api/ai/categorize-ingredient', async (req, res) => {
   const { name } = req.body;
-  if (!name) return res.status(400).json({ error: "Nom d'ingrédient requis" });
+  if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: "Nom d'ingrédient requis" });
+  if (name.length > 200) return res.status(400).json({ error: "Nom d'ingrédient trop long" });
   
   const prompt = `Détermine le rayon de supermarché / magasin de proximité le plus adapté pour cet ingrédient : "${name}".
 Les choix possibles de rayons sont :
@@ -868,7 +916,8 @@ const stockTools = [{
 // --- CHAT WITH RATATOUILLE ENDPOINT ---
 app.post('/api/ai/chat', async (req, res) => {
   const { messages } = req.body;
-  if (!messages || !Array.isArray(messages)) {
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50 ||
+      messages.some((message: any) => !message || typeof message.text !== 'string' || message.text.length > 8_000)) {
     return res.status(400).json({ error: "Historique des messages invalide ou absent" });
   }
 
@@ -1129,7 +1178,7 @@ En attendant, je prépare mes cuillères et j'affûte mes couteaux dans ma petit
         actionsExecuted: executedActions
       });
     }
-    res.status(500).json({ error: err.message || "Erreur interne de communication avec Ratatouille." });
+    sendInternalError(res, 'Ratatouille Chat Error:', err, "Erreur interne de communication avec Ratatouille.");
   }
 });
 

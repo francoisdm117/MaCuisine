@@ -32,10 +32,14 @@ COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
 
 # Create a dedicated directory for local persistence (server-data/db.json)
-RUN mkdir -p /app/server-data
+RUN mkdir -p /app/server-data /app/recipes && \
+    chown -R node:node /app
 
 # Expose port 3000
 EXPOSE 3000
+
+# Do not run the application as root.
+USER node
 
 # Run the app
 CMD ["node", "dist/server.cjs"]
