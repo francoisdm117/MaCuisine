@@ -14,6 +14,7 @@ interface Message {
 interface RatatouilleChatPageProps {
   stockIngredients: Ingredient[];
   onStockUpdated?: (newIngredients: Ingredient[]) => void;
+  compact?: boolean;
 }
 
 const STOCK_ACTION_PROMPTS = [
@@ -31,7 +32,7 @@ const PRESET_PROMPTS = [
   { label: "🍲 Que manger ce soir ?", text: "Inspire-moi ! Quels repas simples, réconfortants et locaux puis-je préparer avec des produits frais ?" }
 ];
 
-export default function RatatouilleChatPage({ stockIngredients, onStockUpdated }: RatatouilleChatPageProps) {
+export default function RatatouilleChatPage({ stockIngredients, onStockUpdated, compact = false }: RatatouilleChatPageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -179,7 +180,7 @@ export default function RatatouilleChatPage({ stockIngredients, onStockUpdated }
     <div className="space-y-6" id="ratatouille-chat-page-container">
       
       {/* Page Title & Aesthetic Header */}
-      <div className="bg-natural-sage-light border border-natural-border rounded-2xl p-6 shadow-2xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      {!compact && <div className="bg-natural-sage-light border border-natural-border rounded-2xl p-6 shadow-2xs relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="absolute top-0 right-0 p-8 opacity-5 text-natural-sage">
           <ChefHat className="w-48 h-48 rotate-12" />
         </div>
@@ -200,12 +201,12 @@ export default function RatatouilleChatPage({ stockIngredients, onStockUpdated }
           <Trash2 className="w-3.5 h-3.5" />
           <span>Réinitialiser la cuisine</span>
         </button>
-      </div>
+      </div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <div className={`grid grid-cols-1 ${compact ? '' : 'lg:grid-cols-4'} gap-6 items-start`}>
         
         {/* Left Column: Quick Presets & Live Stock helper */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className={`${compact ? 'hidden' : 'lg:col-span-1'} space-y-4`}>
           
           {/* Quick Stock Actions card */}
           <div className="bg-natural-paper border border-emerald-200/80 rounded-xl p-4 shadow-3xs space-y-3">
@@ -276,7 +277,7 @@ export default function RatatouilleChatPage({ stockIngredients, onStockUpdated }
         </div>
 
         {/* Right Column: Active Dialogue Interface */}
-        <div className="lg:col-span-3 flex flex-col h-[600px] bg-natural-paper border border-natural-border rounded-2xl shadow-3xs overflow-hidden">
+        <div className={`${compact ? '' : 'lg:col-span-3'} flex flex-col h-[600px] bg-natural-paper border border-natural-border rounded-2xl shadow-3xs overflow-hidden`}>
           
           {/* Header Bar */}
           <div className="bg-[#FAF9F5] border-b border-natural-border px-4 py-3 flex items-center justify-between">

@@ -15,13 +15,13 @@ export default function Navigation({
   isCookingActive
 }: NavigationProps) {
   return (
-    <nav className="bg-natural-paper border-b border-natural-border sticky top-0 z-40 shadow-xs" id="main-navigation">
+    <nav className="sticky top-0 z-40 border-b border-natural-border bg-natural-paper/95 shadow-sm backdrop-blur" id="main-navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
           {/* Brand/Logo Section */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => onChangeTab('recipes')}>
-            <div className="w-10 h-10 rounded-xl bg-natural-sage flex items-center justify-center text-white shadow-sm">
+          <div className="flex cursor-pointer items-center gap-2" onClick={() => onChangeTab('recipes')}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-natural-sage text-white shadow-sm">
               <ChefHat className="w-5.5 h-5.5" />
             </div>
             <div>
@@ -36,7 +36,7 @@ export default function Navigation({
             <button
               onClick={() => onChangeTab('recipes')}
               id="tab-recipes-btn"
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 currentTab === 'recipes' 
                   ? 'bg-natural-sage text-white shadow-xs' 
                   : 'text-natural-sage hover:bg-natural-sage-light/50'
@@ -49,7 +49,7 @@ export default function Navigation({
             <button
               onClick={() => onChangeTab('shopping')}
               id="tab-shopping-btn"
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all relative cursor-pointer ${
+              className={`relative inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 currentTab === 'shopping' 
                   ? 'bg-natural-sage text-white shadow-xs' 
                   : 'text-natural-sage hover:bg-natural-sage-light/50'

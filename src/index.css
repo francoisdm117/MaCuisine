@@ -6,19 +6,29 @@
   --font-sans: "Outfit", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-natural-bg: #F5F5F0;
-  --color-natural-text: #2D2D2A;
-  --color-natural-sage: #5A5A40;
-  --color-natural-sage-light: #EBEBE0;
-  --color-natural-border: #D6D6C2;
-  --color-natural-accent: #A68A64;
-  --color-natural-highlight: #FFF4E5;
-  --color-natural-category: #8E916D;
-  --color-natural-paper: #FDFCF7;
+  --color-natural-bg: #F7F4ED;
+  --color-natural-text: #252A24;
+  --color-natural-sage: #385548;
+  --color-natural-sage-light: #E2EDE5;
+  --color-natural-border: #D8D8C8;
+  --color-natural-accent: #C85D3A;
+  --color-natural-highlight: #FFF0DD;
+  --color-natural-category: #5D6B5C;
+  --color-natural-paper: #FFFEFA;
 }
 
 body {
-  background-color: #F5F5F0;
-  color: #2D2D2A;
+  background-color: #F7F4ED;
+  color: #252A24;
   font-family: var(--font-sans);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: #C85D3A;
+  color: #FFFEFA;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, ShoppingBag, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { ChefHat, ShoppingBag, Loader2, Sparkles, AlertTriangle, MessageCircle, X } from 'lucide-react';
 import Navigation from './components/Navigation';
 import RecipeBookPage from './components/RecipeBookPage';
 import ShoppingPage from './components/ShoppingPage';
@@ -23,6 +23,7 @@ export default function App() {
 
   // Active cooking recipe
   const [activeCookingRecipe, setActiveCookingRecipe] = useState<Recipe | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Initial Fetch
   const fetchDB = async () => {
@@ -412,6 +413,61 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <button
+        type="button"
+        aria-label="Ouvrir Ratatouille"
+        aria-expanded={isChatOpen}
+        onClick={() => setIsChatOpen(true)}
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-natural-accent px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-natural-accent/20 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-natural-accent/25"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <span className="hidden sm:inline">Parler à Ratatouille</span>
+      </button>
+
+      {isChatOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-natural-text/20 backdrop-blur-[2px]"
+          onClick={() => setIsChatOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        aria-label="Assistant Ratatouille"
+        aria-hidden={!isChatOpen}
+        className={`fixed right-0 top-0 z-50 h-full w-full max-w-xl transform bg-natural-paper shadow-2xl transition-transform duration-300 ease-out ${
+          isChatOpen ? 'translate-x-0' : 'pointer-events-none translate-x-full'
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b border-natural-border bg-natural-sage px-5 py-4 text-white">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15">
+                <ChefHat className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-serif text-lg font-semibold">Ratatouille</p>
+                <p className="text-xs text-white/75">Votre sous-chef, toujours à portée de main</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label="Fermer Ratatouille"
+              onClick={() => setIsChatOpen(false)}
+              className="rounded-xl p-2 text-white/80 transition-colors hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+            <RatatouilleChatPage
+              compact
+              stockIngredients={ingredients}
+              onStockUpdated={(newStock) => setIngredients(newStock)}
+            />
+          </div>
+        </div>
+      </aside>
 
       {/* FOOTER SECTION */}
       <footer className="bg-natural-sage text-natural-highlight border-t border-natural-border py-8 text-center text-xs space-y-2 mt-12 bg-opacity-95">
